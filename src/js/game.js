@@ -146,6 +146,13 @@ function decideGhost( game, g ) {
     const px = Math.round( p.x );
     const py = Math.round( p.y );
     g.dir = chooseHunterDir( g, px, py, choices );
+  } else if ( g.kind === 'pinky' ) {
+    const d = DIRS[ p.dir ] || { x: 0, y: 0 };
+    let tx = Math.round( p.x ) + d.x * 4;
+    let ty = Math.round( p.y ) + d.y * 4;
+    // Bug arcade: mirando arriba se desplaza 4 a la izquierda además.
+    if ( p.dir === 'up' ) tx -= 4;
+    g.dir = chooseHunterDir( g, tx, ty, choices );
   } else {
     g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
   }
