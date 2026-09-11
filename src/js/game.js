@@ -161,6 +161,17 @@ function decideGhost( game, g ) {
     } else {
       g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
     }
+  } else if ( g.kind === 'clyde' ) {
+    const px = Math.round( p.x );
+    const py = Math.round( p.y );
+    const gx = Math.round( g.x );
+    const gy = Math.round( g.y );
+    const dist = Math.abs( gx - px ) + Math.abs( gy - py );
+    if ( dist < 8 ) {
+      g.dir = chooseHunterDir( g, 1, 30, choices );
+    } else {
+      g.dir = chooseHunterDir( g, px, py, choices );
+    }
   } else {
     g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
   }
