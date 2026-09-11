@@ -153,6 +153,14 @@ function decideGhost( game, g ) {
     // Bug arcade: mirando arriba se desplaza 4 a la izquierda además.
     if ( p.dir === 'up' ) tx -= 4;
     g.dir = chooseHunterDir( g, tx, ty, choices );
+  } else if ( g.kind === 'inky' ) {
+    if ( Math.random() < 0.5 ) {
+      const px = Math.round( p.x );
+      const py = Math.round( p.y );
+      g.dir = chooseHunterDir( g, px, py, choices );
+    } else {
+      g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
+    }
   } else {
     g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
   }
