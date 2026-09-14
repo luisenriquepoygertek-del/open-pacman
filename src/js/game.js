@@ -159,6 +159,12 @@ function decideGhost( game, g ) {
   // Sin salida (callejon): permitir el giro de 180.
   const choices = options.length ? options : [ '' + OPPOSITE[ g.dir ] ];
 
+  // Frightened: huida aleatoria, ignora personalidad
+  if ( game.frightenedTimer > 0 ) {
+    g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
+    return;
+  }
+
   if ( g.kind === 'hunter' ) {
     const px = Math.round( p.x );
     const py = Math.round( p.y );
@@ -197,6 +203,15 @@ function decideGhost( game, g ) {
 function moveGhost( game, g ) {
   const grid = game.grid;
   const width = grid[ 0 ].length;
+
+  // Actualizar estado frightened cada frame
+  if ( game.frightenedTimer > 0 ) {
+    g.isFrightened = true;
+    g.speed = GHOST_FRIGHTENED_SPEED;
+  } else {
+    g.isFrightened = false;
+    g.speed = GHOST_SPEEDS[ g.kind ] ?? GHOST_SPEED;
+  }
 
   if ( aligned( g.x ) && aligned( g.y ) ) {
     g.x = Math.round( g.x );
