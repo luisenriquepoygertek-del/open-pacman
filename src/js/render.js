@@ -153,7 +153,6 @@ const GHOST_COLOR_BY_KIND = {
   inky:   '#00ffff',
   clyde:  '#ffb852',
 };
-const GHOST_FRIGHTENED_COLOR = '#0000ff';
 
 function draw( ctx, game, frame ) {
   const grid = game.grid;
@@ -168,7 +167,7 @@ function draw( ctx, game, frame ) {
   drawDots( ctx, grid );
   drawPacman( ctx, game.pacman, frame );
   game.ghosts.forEach( ( g ) => {
-    const col = g.isFrightened ? GHOST_FRIGHTENED_COLOR : ( GHOST_COLOR_BY_KIND[ g.kind ] || GHOST_COLORS[ 0 ] || '#ff0000' );
+    const col = g.isFrightened ? (window.GHOST_FRIGHTENED_COLOR || '#0000ff') : ( GHOST_COLOR_BY_KIND[ g.kind ] || GHOST_COLORS[ 0 ] || '#ff0000' );
     drawGhost( ctx, g, col );
   } );
   drawHUD( ctx, game, W );
