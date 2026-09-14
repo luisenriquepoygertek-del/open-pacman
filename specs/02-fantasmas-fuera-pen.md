@@ -1,6 +1,6 @@
 # SPEC 02 — Fantasmas fuera del pen (corrección salida)
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** SPEC 01
 > **Date:** 2026-09-14
 > **Objective:** Reubicar los 2 fantasmas que arrancan dentro del pen a celdas transitables del mapa y normalizar sus velocidades para que alineen y nunca queden atrapados al iniciar el movimiento.
