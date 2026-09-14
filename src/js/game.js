@@ -18,6 +18,16 @@ const GHOST_SPEEDS = {
   inky:   0.10,
   clyde:  0.10,
 };
+const POWER_PELLET = 4;
+const FRIGHTENED_DURATION = 360; // 6s a 60fps
+const GHOST_FRIGHTENED_SPEED = 0.05; // 1/20 alinea cada 20
+const GHOST_FRIGHTENED_COLOR = '#0000ff';
+const POWER_PELLET_SCORE = 50;
+const GHOST_EATEN_SCORE = 200;
+window.POWER_PELLET = POWER_PELLET;
+window.FRIGHTENED_DURATION = FRIGHTENED_DURATION;
+window.GHOST_FRIGHTENED_SPEED = GHOST_FRIGHTENED_SPEED;
+window.GHOST_FRIGHTENED_COLOR = GHOST_FRIGHTENED_COLOR;
 
 // Crea una partida nueva. Copia MAZE (pristino) a game.grid para poder comer
 // dots sin destruir el original, y reiniciar.
