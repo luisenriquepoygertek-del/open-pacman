@@ -70,10 +70,12 @@ function drawDots( ctx, grid ) {
   ctx.fillStyle = DOT_COLOR;
   for ( let y = 0; y < grid.length; y++ ) {
     for ( let x = 0; x < grid[ 0 ].length; x++ ) {
-      if ( grid[ y ][ x ] !== 2 ) continue;
+      const v = grid[ y ][ x ];
+      if ( v !== 2 && v !== 4 ) continue;
       const { cx, cy } = cellCenter( x, y );
+      const r = v === 4 ? 6 : 2.5;
       ctx.beginPath();
-      ctx.arc( cx, cy, 2.5, 0, Math.PI * 2 );
+      ctx.arc( cx, cy, r, 0, Math.PI * 2 );
       ctx.fill();
     }
   }
@@ -151,6 +153,7 @@ const GHOST_COLOR_BY_KIND = {
   inky:   '#00ffff',
   clyde:  '#ffb852',
 };
+const GHOST_FRIGHTENED_COLOR = '#0000ff';
 
 function draw( ctx, game, frame ) {
   const grid = game.grid;
@@ -164,7 +167,10 @@ function draw( ctx, game, frame ) {
   drawDoor( ctx, grid );
   drawDots( ctx, grid );
   drawPacman( ctx, game.pacman, frame );
-  game.ghosts.forEach( ( g ) => drawGhost( ctx, g, GHOST_COLOR_BY_KIND[ g.kind ] || GHOST_COLORS[ 0 ] || '#ff0000' ) );
+  game.ghosts.forEach( ( g ) => {
+    const col = g.isFrightened ? GHOST_FRIGHTENED_COLOR : ( GHOST_COLOR_BY_KIND[ g.kind ] || GHOST_COLORS[ 0 ] || '#ff0000' );
+    drawGhost( ctx, g, col );
+  } );
   drawHUD( ctx, game, W );
 }
 
