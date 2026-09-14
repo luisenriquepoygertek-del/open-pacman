@@ -37,13 +37,14 @@ function createGame() {
   grid[ PACMAN_START.y ][ PACMAN_START.x ] = 0;
 
   let dots = 0;
-  for ( const row of grid ) for ( const v of row ) if ( v === 2 ) dots++;
+  for ( const row of grid ) for ( const v of row ) if ( v === 2 || v === POWER_PELLET ) dots++;
 
   return {
     state: 'start',
     score: 0,
     lives: 3,
     dotsRemaining: dots,
+    frightenedTimer: 0,
     grid,
     pacman: {
       x: PACMAN_START.x,
@@ -58,6 +59,7 @@ function createGame() {
       dir: 'up',
       speed: GHOST_SPEEDS[ g.kind ] ?? GHOST_SPEED,
       kind: g.kind,
+      isFrightened: false,
     } ) ),
   };
 }
