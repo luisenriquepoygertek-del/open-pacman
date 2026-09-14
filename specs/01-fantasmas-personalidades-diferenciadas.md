@@ -1,6 +1,6 @@
 # SPEC 01 — Fantasmas con personalidades diferenciadas
 
-> **Status:** Approved
+> **Status:** Implemented
 > **Depends on:** —
 > **Date:** 2026-09-11
 > **Objective:** Dotar al juego de 4 fantasmas con personalidades distintas —uno cazador agresivo que persigue a PacMan— cada uno con color y velocidad propios y salida libre desde la casa.
