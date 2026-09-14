@@ -11,7 +11,13 @@ const DIRS = {
 const OPPOSITE = { left: 'right', right: 'left', up: 'down', down: 'up' };
 
 const PACMAN_SPEED = 0.125; // 1/8 celda/frame -> alinea cada 8 frames
-const GHOST_SPEED = 0.1;    // 1/10 celda/frame
+const GHOST_SPEED = 0.1;    // fallback 1/10 celda/frame
+const GHOST_SPEEDS = {
+  hunter: 0.11,
+  pinky:  0.10,
+  inky:   0.10,
+  clyde:  0.09,
+};
 
 // Crea una partida nueva. Copia MAZE (pristino) a game.grid para poder comer
 // dots sin destruir el original, y reiniciar.
@@ -40,7 +46,7 @@ function createGame() {
       x: g.x,
       y: g.y,
       dir: 'up',
-      speed: GHOST_SPEED,
+      speed: GHOST_SPEEDS[ g.kind ] ?? GHOST_SPEED,
       kind: g.kind,
     } ) ),
   };
@@ -110,6 +116,22 @@ function movePacman( game ) {
   wrapTunnel( p, width );
 }
 
+function chooseHunterDir( g, targetX, targetY, choices ) {
+  let best = choices[ 0 ];
+  let bestDist = Infinity;
+  for ( const dir of choices ) {
+    const d = DIRS[ dir ];
+    const nx = g.x + d.x;
+    const ny = g.y + d.y;
+    const dist = Math.abs( nx - targetX ) + Math.abs( ny - targetY );
+    if ( dist < bestDist ) {
+      bestDist = dist;
+      best = dir;
+    }
+  }
+  return best;
+}
+
 function decideGhost( game, g ) {
   const grid = game.grid;
   const p = game.pacman;
@@ -123,19 +145,33 @@ function decideGhost( game, g ) {
   if ( g.kind === 'hunter' ) {
     const px = Math.round( p.x );
     const py = Math.round( p.y );
-    let best = choices[ 0 ];
-    let bestDist = Infinity;
-    for ( const dir of choices ) {
-      const d = DIRS[ dir ];
-      const nx = g.x + d.x;
-      const ny = g.y + d.y;
-      const dist = Math.abs( nx - px ) + Math.abs( ny - py );
-      if ( dist < bestDist ) {
-        bestDist = dist;
-        best = dir;
-      }
+    g.dir = chooseHunterDir( g, px, py, choices );
+  } else if ( g.kind === 'pinky' ) {
+    const d = DIRS[ p.dir ] || { x: 0, y: 0 };
+    let tx = Math.round( p.x ) + d.x * 4;
+    let ty = Math.round( p.y ) + d.y * 4;
+    // Bug arcade: mirando arriba se desplaza 4 a la izquierda además.
+    if ( p.dir === 'up' ) tx -= 4;
+    g.dir = chooseHunterDir( g, tx, ty, choices );
+  } else if ( g.kind === 'inky' ) {
+    if ( Math.random() < 0.5 ) {
+      const px = Math.round( p.x );
+      const py = Math.round( p.y );
+      g.dir = chooseHunterDir( g, px, py, choices );
+    } else {
+      g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
     }
-    g.dir = best;
+  } else if ( g.kind === 'clyde' ) {
+    const px = Math.round( p.x );
+    const py = Math.round( p.y );
+    const gx = Math.round( g.x );
+    const gy = Math.round( g.y );
+    const dist = Math.abs( gx - px ) + Math.abs( gy - py );
+    if ( dist < 8 ) {
+      g.dir = chooseHunterDir( g, 1, 30, choices );
+    } else {
+      g.dir = chooseHunterDir( g, px, py, choices );
+    }
   } else {
     g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
   }
