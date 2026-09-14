@@ -13,11 +13,21 @@ const OPPOSITE = { left: 'right', right: 'left', up: 'down', down: 'up' };
 const PACMAN_SPEED = 0.125; // 1/8 celda/frame -> alinea cada 8 frames
 const GHOST_SPEED = 0.1;    // fallback 1/10 celda/frame
 const GHOST_SPEEDS = {
-  hunter: 0.11,
+  hunter: 0.125,
   pinky:  0.10,
   inky:   0.10,
-  clyde:  0.09,
+  clyde:  0.10,
 };
+const POWER_PELLET = 4;
+const FRIGHTENED_DURATION = 360; // 6s a 60fps
+const GHOST_FRIGHTENED_SPEED = 0.05; // 1/20 alinea cada 20
+const GHOST_FRIGHTENED_COLOR = '#0000ff';
+const POWER_PELLET_SCORE = 50;
+const GHOST_EATEN_SCORE = 200;
+window.POWER_PELLET = POWER_PELLET;
+window.FRIGHTENED_DURATION = FRIGHTENED_DURATION;
+window.GHOST_FRIGHTENED_SPEED = GHOST_FRIGHTENED_SPEED;
+window.GHOST_FRIGHTENED_COLOR = GHOST_FRIGHTENED_COLOR;
 
 // Crea una partida nueva. Copia MAZE (pristino) a game.grid para poder comer
 // dots sin destruir el original, y reiniciar.
@@ -27,13 +37,14 @@ function createGame() {
   grid[ PACMAN_START.y ][ PACMAN_START.x ] = 0;
 
   let dots = 0;
-  for ( const row of grid ) for ( const v of row ) if ( v === 2 ) dots++;
+  for ( const row of grid ) for ( const v of row ) if ( v === 2 || v === POWER_PELLET ) dots++;
 
   return {
     state: 'start',
     score: 0,
     lives: 3,
     dotsRemaining: dots,
+    frightenedTimer: 0,
     grid,
     pacman: {
       x: PACMAN_START.x,
@@ -48,6 +59,7 @@ function createGame() {
       dir: 'up',
       speed: GHOST_SPEEDS[ g.kind ] ?? GHOST_SPEED,
       kind: g.kind,
+      isFrightened: false,
     } ) ),
   };
 }
@@ -105,6 +117,11 @@ function movePacman( game ) {
       grid[ p.y ][ p.x ] = 0;
       game.score += 10;
       game.dotsRemaining--;
+    } else if ( grid[ p.y ][ p.x ] === POWER_PELLET ) {
+      grid[ p.y ][ p.x ] = 0;
+      game.score += POWER_PELLET_SCORE;
+      game.dotsRemaining--;
+      game.frightenedTimer = FRIGHTENED_DURATION;
     }
     // Si no puede seguir, se detiene en la celda.
     if ( !canMove( grid, p.x, p.y, p.dir, 'pacman' ) ) return;
@@ -141,6 +158,12 @@ function decideGhost( game, g ) {
   );
   // Sin salida (callejon): permitir el giro de 180.
   const choices = options.length ? options : [ '' + OPPOSITE[ g.dir ] ];
+
+  // Frightened: huida aleatoria, ignora personalidad
+  if ( game.frightenedTimer > 0 ) {
+    g.dir = choices[ Math.floor( Math.random() * choices.length ) ];
+    return;
+  }
 
   if ( g.kind === 'hunter' ) {
     const px = Math.round( p.x );
@@ -181,6 +204,15 @@ function moveGhost( game, g ) {
   const grid = game.grid;
   const width = grid[ 0 ].length;
 
+  // Actualizar estado frightened cada frame
+  if ( game.frightenedTimer > 0 ) {
+    g.isFrightened = true;
+    g.speed = GHOST_FRIGHTENED_SPEED;
+  } else {
+    g.isFrightened = false;
+    g.speed = GHOST_SPEEDS[ g.kind ] ?? GHOST_SPEED;
+  }
+
   if ( aligned( g.x ) && aligned( g.y ) ) {
     g.x = Math.round( g.x );
     g.y = Math.round( g.y );
@@ -200,10 +232,13 @@ function resetPositions( game ) {
   p.y = PACMAN_START.y;
   p.dir = 'left';
   p.nextDir = null;
+  game.frightenedTimer = 0;
   game.ghosts.forEach( ( g, i ) => {
     g.x = GHOST_STARTS[ i ].x;
     g.y = GHOST_STARTS[ i ].y;
     g.dir = 'up';
+    g.isFrightened = false;
+    g.speed = GHOST_SPEEDS[ g.kind ] ?? GHOST_SPEED;
   } );
 }
 
@@ -212,18 +247,29 @@ function collides( a, b ) {
 }
 
 function update( game ) {
+  if ( game.frightenedTimer > 0 ) game.frightenedTimer--;
+
   movePacman( game );
   game.ghosts.forEach( ( g ) => moveGhost( game, g ) );
 
-  for ( const g of game.ghosts ) {
+  for ( let i = 0; i < game.ghosts.length; i++ ) {
+    const g = game.ghosts[ i ];
     if ( collides( game.pacman, g ) ) {
-      game.lives--;
-      if ( game.lives <= 0 ) {
-        game.state = 'lost';
-        return;
+      if ( game.frightenedTimer > 0 ) {
+        game.score += GHOST_EATEN_SCORE;
+        g.x = GHOST_STARTS[ i ].x;
+        g.y = GHOST_STARTS[ i ].y;
+        g.dir = 'up';
+        g.isFrightened = true;
+      } else {
+        game.lives--;
+        if ( game.lives <= 0 ) {
+          game.state = 'lost';
+          return;
+        }
+        resetPositions( game );
+        break;
       }
-      resetPositions( game );
-      break;
     }
   }
 
