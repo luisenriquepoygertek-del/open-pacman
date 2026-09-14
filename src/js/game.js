@@ -13,10 +13,10 @@ const OPPOSITE = { left: 'right', right: 'left', up: 'down', down: 'up' };
 const PACMAN_SPEED = 0.125; // 1/8 celda/frame -> alinea cada 8 frames
 const GHOST_SPEED = 0.1;    // fallback 1/10 celda/frame
 const GHOST_SPEEDS = {
-  hunter: 0.11,
+  hunter: 0.125,
   pinky:  0.10,
   inky:   0.10,
-  clyde:  0.09,
+  clyde:  0.10,
 };
 
 // Crea una partida nueva. Copia MAZE (pristino) a game.grid para poder comer
