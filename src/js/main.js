@@ -19,6 +19,7 @@ const KEY_DIR = {
 document.addEventListener( 'keydown', ( e ) => {
   const dir = KEY_DIR[ e.key ];
   if ( !dir ) return;
+  if ( e.repeat ) return;
   e.preventDefault();
   if ( game.state === 'playing' ) game.pacman.nextDir = dir;
 } );
