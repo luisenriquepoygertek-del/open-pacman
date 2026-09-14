@@ -103,6 +103,17 @@ function movePacman( game ) {
   const grid = game.grid;
   const width = grid[ 0 ].length;
 
+  // Reversa inmediata 180° incluso entre celdas (fidelidad arcade).
+  // Evita quedarse bloqueado contra pared si el jugador pulsa atrás a mitad de celda.
+  if ( p.nextDir && OPPOSITE[ p.dir ] === p.nextDir ) {
+    const rx = Math.round( p.x );
+    const ry = Math.round( p.y );
+    if ( canMove( grid, rx, ry, p.nextDir, 'pacman' ) ) {
+      p.dir = p.nextDir;
+      p.nextDir = null;
+    }
+  }
+
   if ( aligned( p.x ) && aligned( p.y ) ) {
     p.x = Math.round( p.x );
     p.y = Math.round( p.y );
